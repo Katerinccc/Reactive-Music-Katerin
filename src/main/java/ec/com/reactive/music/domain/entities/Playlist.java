@@ -22,4 +22,16 @@ public class Playlist {
     private String username;
     private ArrayList<Song> songs;
     private LocalTime duration;
+
+    public void addSongDuration(LocalTime songDuration){
+        this.duration = this.duration.plusHours(songDuration.getHour())
+                .plusMinutes(songDuration.getMinute());
+    }
+
+    public void decreaseSongDuration(LocalTime songDuration){
+        this.duration = this.duration.minusHours(songDuration.getHour())
+                .plusMinutes(songDuration.getMinute());
+    }
+
+
 }
