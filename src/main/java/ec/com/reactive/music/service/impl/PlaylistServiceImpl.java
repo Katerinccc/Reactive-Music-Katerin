@@ -63,25 +63,39 @@ public class PlaylistServiceImpl implements IPlaylistService {
         return this.iPlaylistRepository
                 .findById(id)
                 .switchIfEmpty(Mono.error(new Throwable(HttpStatus.NOT_FOUND.toString())))
-                .flatMap(Playlist -> {
-                    aDto.setIdPlaylist(Playlist.getIdPlaylist());
-                    return this.savePlaylist(aDto);
-                })
+                .flatMap(Playlist -> this.savePlaylist(aDto))
                 .map(PlaylistDTOResponseEntity -> new ResponseEntity<>(PlaylistDTOResponseEntity.getBody(),HttpStatus.ACCEPTED))
                 .onErrorResume(throwable -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_MODIFIED)));
     }
 
     @Override
     public Mono<ResponseEntity<PlaylistDTO>> addSongPlaylist(String idPlaylist, SongDTO songDTO) {
-        return null;
+        return this.iPlaylistRepository
+                .findById(idPlaylist)
+                .switchIfEmpty(Mono.error(new Throwable(HttpStatus.NOT_FOUND.toString())))
+                .flatMap(playlist -> {
+                    playlist.getSongs().add(songService.dtoToEntity(songDTO));
+                    playlist.increasePlaylistDuration(songDTO.getDuration());
+                    return this.savePlaylist(entityToDTO(playlist));
+                })
+                .map(playlistDTOResponseEntity -> new ResponseEntity<>(playlistDTOResponseEntity.getBody(),HttpStatus.OK))
+                .onErrorResume(throwable -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_MODIFIED)));
     }
 
     @Override
     public Mono<ResponseEntity<PlaylistDTO>> removeSongPlaylist(String idPlaylist, SongDTO songDTO) {
-        return null;
+        return this.iPlaylistRepository
+                .findById(idPlaylist)
+                .switchIfEmpty(Mono.error(new Throwable(HttpStatus.NOT_FOUND.toString())))
+                .flatMap(playlist -> {
+                    playlist.getSongs().remove(songService.dtoToEntity(songDTO));
+                    playlist.decreasePlaylistDuration(songDTO.getDuration());
+                    return this.savePlaylist(entityToDTO(playlist));
+                })
+                .map(playlistDTOResponseEntity -> new ResponseEntity<>(playlistDTOResponseEntity.getBody(),HttpStatus.ACCEPTED))
+                .onErrorResume(throwable -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_MODIFIED)));
     }
 
-    //I have to change the implementation vs what we did in class because the unit test was not working properly
     @Override
     public Mono<ResponseEntity<String>> deletePlaylist(String idPlaylist) {
         return this.iPlaylistRepository

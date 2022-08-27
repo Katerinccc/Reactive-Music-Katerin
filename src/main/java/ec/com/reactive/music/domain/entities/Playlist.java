@@ -23,14 +23,16 @@ public class Playlist {
     private ArrayList<Song> songs;
     private LocalTime duration;
 
-    public void addSongDuration(LocalTime songDuration){
+    public void increasePlaylistDuration(LocalTime songDuration){
         this.duration = this.duration.plusHours(songDuration.getHour())
-                .plusMinutes(songDuration.getMinute());
+                .plusMinutes(songDuration.getMinute())
+                .plusSeconds(songDuration.getSecond());
     }
 
-    public void decreaseSongDuration(LocalTime songDuration){
+    public void decreasePlaylistDuration(LocalTime songDuration){
         this.duration = this.duration.minusHours(songDuration.getHour())
-                .plusMinutes(songDuration.getMinute());
+                .minusMinutes(songDuration.getMinute())
+                .minusSeconds(songDuration.getSecond());
     }
 
 

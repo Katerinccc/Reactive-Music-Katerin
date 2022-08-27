@@ -2,10 +2,12 @@ package ec.com.reactive.music.web;
 
 import ec.com.reactive.music.domain.dto.PlaylistDTO;
 import ec.com.reactive.music.service.impl.PlaylistServiceImpl;
+import ec.com.reactive.music.service.impl.SongServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +21,9 @@ public class PlaylistResource {
 
     @Autowired
     PlaylistServiceImpl playlistService;
+
+    @Autowired
+    SongServiceImpl songService;
 
     @GetMapping("/findAllPlaylist")
     private Mono<ResponseEntity<Flux<PlaylistDTO>>> getPlaylists(){
@@ -40,6 +45,24 @@ public class PlaylistResource {
                                                           @RequestBody PlaylistDTO playlistDTO)
     {
         return playlistService.updatePlaylist(id, playlistDTO);
+    }
+
+    @PatchMapping("/playlist/{id}/addSong/{idSong}")
+    private Mono<ResponseEntity<PlaylistDTO>> addSongPlaylist(@PathVariable String id,
+                                                              @PathVariable String idSong)
+    {
+        return songService.findSongById(idSong)
+                .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()))
+                .flatMap(songDTOResponse -> playlistService.addSongPlaylist(id, songDTOResponse.getBody()));
+    }
+
+    @PatchMapping("/playlist/{id}/removeSong/{idSong}")
+    private Mono<ResponseEntity<PlaylistDTO>> removeSongPlaylist(@PathVariable String id,
+                                                              @PathVariable String idSong)
+    {
+        return songService.findSongById(idSong)
+                .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()))
+                .flatMap(songDTOResponse -> playlistService.removeSongPlaylist(id, songDTOResponse.getBody()));
     }
 
     @DeleteMapping("/deletePlaylist/{id}")
