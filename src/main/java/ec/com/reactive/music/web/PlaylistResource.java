@@ -41,7 +41,7 @@ public class PlaylistResource {
     }
 
     @PutMapping("/updatePlaylist/{id}")
-    private Mono<ResponseEntity<PlaylistDTO>> putPlaylist(@PathVariable String id ,
+    private Mono<ResponseEntity<PlaylistDTO>> updatePlaylist(@PathVariable String id ,
                                                           @RequestBody PlaylistDTO playlistDTO)
     {
         return playlistService.updatePlaylist(id, playlistDTO);
